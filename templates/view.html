@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>View Paste</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="link">&larr; New / Get another</a>
+    <h1>Paste: <code id="pasteId"></code></h1>
+    <div id="pinBox" class="row">
+      <input id="pin" placeholder="PIN (if required)">
+      <button id="loadBtn">Load</button>
+    </div>
+    <pre id="content" class="code"></pre>
+    <footer><span class="muted">Share this URL with your batchmates.</span></footer>
+  </div>
+
+  <script>
+    const codeId = window.location.pathname.split('/').pop();
+    document.getElementById('pasteId').textContent = codeId;
+
+    async function loadPaste() {
+      const pin = document.getElementById('pin').value;
+      const res = await fetch('/api/get', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id: codeId, pin })
+      });
+      const data = await res.json();
+      const el = document.getElementById('content');
+      if (data.content) {
+        el.textContent = data.content;
+      } else {
+        el.textContent = data.error || 'Error';
+      }
+    }
+    document.getElementById('loadBtn').addEventListener('click', loadPaste);
+    // Try once without PIN (in case it's public)
+    loadPaste();
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: batch-code-share
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: BASE_URL
+        value: ""  # set to your domain after deploy (optional)
+      - key: DB_PATH
+        value: "codes.db"
+    healthCheckPath: /api/health
+    disk:
+      name: data
+      mountPath: /opt/render/project/src
+      sizeGB: 1

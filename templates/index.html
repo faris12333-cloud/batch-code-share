@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Batch Code Share</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Batch Code Share</h1>
+    <p class="muted">Paste your code, get a short ID, share with friends. Optional PIN for privacy.</p>
+
+    <section class="card">
+      <h2>Create a Paste</h2>
+      <input id="title" placeholder="Title (optional)" />
+      <textarea id="content" placeholder="Paste your code here..." rows="14"></textarea>
+      <div class="row">
+        <input id="pin" placeholder="Set a PIN (optional)" />
+        <button id="saveBtn">Save & Get ID</button>
+      </div>
+      <p id="saveResult" class="mono"></p>
+    </section>
+
+    <section class="card">
+      <h2>Retrieve a Paste</h2>
+      <div class="row">
+        <input id="id" placeholder="Enter ID (e.g., A9f3zQ7)"/>
+        <input id="pinGet" placeholder="PIN (if set)" />
+        <button id="getBtn">Get</button>
+      </div>
+      <pre id="getResult" class="code"></pre>
+    </section>
+
+    <footer>
+      <span class="muted">Free & simple. Avoid storing secrets.</span>
+    </footer>
+  </div>
+
+  <script>
+    const saveBtn = document.getElementById('saveBtn');
+    const getBtn = document.getElementById('getBtn');
+
+    saveBtn.addEventListener('click', async () => {
+      const content = document.getElementById('content').value;
+      const title = document.getElementById('title').value;
+      const pin = document.getElementById('pin').value;
+
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ content, title, pin })
+      });
+      const data = await res.json();
+      const el = document.getElementById('saveResult');
+      if (data.id) {
+        el.textContent = `Saved! ID: ${data.id}  |  Link: ${data.url}`;
+      } else {
+        el.textContent = data.error || 'Error';
+      }
+    });
+
+    getBtn.addEventListener('click', async () => {
+      const id = document.getElementById('id').value;
+      const pin = document.getElementById('pinGet').value;
+      const res = await fetch('/api/get', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id, pin })
+      });
+      const data = await res.json();
+      const el = document.getElementById('getResult');
+      if (data.content) {
+        el.textContent = data.content;
+      } else {
+        el.textContent = data.error || 'Error';
+      }
+    });
+  </script>
+</body>
+</html>
